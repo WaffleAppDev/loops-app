@@ -420,23 +420,32 @@ export default function App() {
     showToast("Uploading...");
     let videoUrl = null, coverUrl = null;
   
-    if (videoBlob) {
-      const ext = videoBlob.type?.includes("mp4") ? "mp4" : "webm";
-      const path = `${groupId}/${Date.now()}.${ext}`;
-      const { data, error } = await supabase.storage
-        .from("Videos")
-        .upload(path, videoBlob, { contentType: videoBlob.type || "video/mp4" });
-      if (error) { showToast("Upload failed — try again"); return; }
-      if (data) videoUrl = supabase.storage.from("Videos").getPublicUrl(data.path).data.publicUrl;
+    if (!videoBlob) {
+      alert("No video blob received — recording may not have saved correctly");
+      return;
     }
   
+    const ext = videoBlob.type?.includes("mp4") ? "mp4" : "webm";
+    const path = `${groupId}/${Date.now()}.${ext}`;
+  
+    const { data, error } = await supabase.storage
+      .from("Videos")
+      .upload(path, videoBlob, { contentType: videoBlob.type || "video/mp4" });
+  
+    if (error) {
+      alert(`Storage error:\nCode: ${error.statusCode}\nMessage: ${error.message}\nDetails: ${JSON.stringify(error)}`);
+      return;
+    }
+  
+    videoUrl = supabase.storage.from("Videos").getPublicUrl(data.path).data.publicUrl;
+  
     if (coverBlob) {
-      const ext = coverBlob.type?.includes("png") ? "png" : "jpg";
-      const path = `${groupId}/${Date.now()}_cover.${ext}`;
-      const { data } = await supabase.storage
+      const coverExt = coverBlob.type?.includes("png") ? "png" : "jpg";
+      const coverPath = `${groupId}/${Date.now()}_cover.${coverExt}`;
+      const { data: cd } = await supabase.storage
         .from("Covers")
-        .upload(path, coverBlob, { contentType: coverBlob.type || "image/jpeg" });
-      if (data) coverUrl = supabase.storage.from("Covers").getPublicUrl(data.path).data.publicUrl;
+        .upload(coverPath, coverBlob, { contentType: coverBlob.type || "image/jpeg" });
+      if (cd) coverUrl = supabase.storage.from("Covers").getPublicUrl(cd.path).data.publicUrl;
     }
   
     const { error: dbErr } = await supabase.from("videos").insert({
@@ -445,7 +454,10 @@ export default function App() {
       video_url: videoUrl, cover_url: coverUrl,
     });
   
-    if (dbErr) { showToast("Post failed — try again"); return; }
+    if (dbErr) {
+      alert(`DB error: ${dbErr.message}`);
+      return;
+    }
   
     showToast("Loop posted! 🎉");
     setNotifs(n => [{ id: `n${Date.now()}`, text: `You posted a new Loop! 🎉`, time: Date.now(), read: false }, ...n]);
