@@ -419,44 +419,36 @@ export default function App() {
   const uploadVideo = async (groupId, title, videoBlob, coverBlob) => {
     showToast("Uploading...");
     let videoUrl = null, coverUrl = null;
-    let debugMsg = "";
   
     if (videoBlob) {
       const ext = videoBlob.type?.includes("mp4") ? "mp4" : "webm";
       const path = `${groupId}/${Date.now()}.${ext}`;
-      debugMsg += `Video: ${videoBlob.type} ${Math.round(videoBlob.size/1024)}kb\n`;
       const { data, error } = await supabase.storage
-        .from("videos")
+        .from("Videos")
         .upload(path, videoBlob, { contentType: videoBlob.type || "video/mp4" });
-      if (error) {
-        debugMsg += `Upload error: ${error.message}\n`;
-        alert("Upload failed:\n" + debugMsg);
-        return;
-      }
-      videoUrl = supabase.storage.from("videos").getPublicUrl(data.path).data.publicUrl;
-      debugMsg += `Video URL: ${videoUrl}\n`;
-    } else {
-      debugMsg += "No video blob!\n";
-      alert("Debug:\n" + debugMsg);
-      return;
+      if (error) { showToast("Upload failed — try again"); return; }
+      if (data) videoUrl = supabase.storage.from("Videos").getPublicUrl(data.path).data.publicUrl;
     }
   
     if (coverBlob) {
       const ext = coverBlob.type?.includes("png") ? "png" : "jpg";
       const path = `${groupId}/${Date.now()}_cover.${ext}`;
       const { data } = await supabase.storage
-        .from("covers")
+        .from("Covers")
         .upload(path, coverBlob, { contentType: coverBlob.type || "image/jpeg" });
-      if (data) coverUrl = supabase.storage.from("covers").getPublicUrl(data.path).data.publicUrl;
+      if (data) coverUrl = supabase.storage.from("Covers").getPublicUrl(data.path).data.publicUrl;
     }
   
-    await supabase.from("videos").insert({
+    const { error: dbErr } = await supabase.from("videos").insert({
       group_id: groupId, user_id: profile.id,
       title: title || "Untitled Loop",
       video_url: videoUrl, cover_url: coverUrl,
     });
   
+    if (dbErr) { showToast("Post failed — try again"); return; }
+  
     showToast("Loop posted! 🎉");
+    setNotifs(n => [{ id: `n${Date.now()}`, text: `You posted a new Loop! 🎉`, time: Date.now(), read: false }, ...n]);
     loadGroups();
   };
 
