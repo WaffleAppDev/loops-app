@@ -151,10 +151,10 @@ input::placeholder{color:var(--muted);}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.85rem;padding:3.5rem 2rem;text-align:center;color:var(--muted);}
 .empty-icon{font-size:2.8rem;}
 .empty p{font-size:.85rem;line-height:1.6;}
-.cam-screen{position:fixed;inset:0;background:#000;z-index:300;display:flex;flex-direction:column;}
+.cam-screen{position:fixed;inset:0;background:#000;z-index:300;display:flex;flex-direction:column;justify-content:space-between;}
 .cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.cam-top{position:absolute;top:calc(var(--safe-top)+.6rem);left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;z-index:10;}
-.cam-bot{position:absolute;bottom:calc(var(--safe-bot)+1.4rem);left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;z-index:10;}
+.cam-top{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,44px) + .8rem) 1.2rem .8rem;}
+.cam-bot{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem calc(env(safe-area-inset-bottom,34px) + 1.4rem);}
 .cam-close-btn{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .cam-close-btn svg{width:17px;height:17px;}
 .cam-flip-btn{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .3s;}
@@ -170,14 +170,14 @@ input::placeholder{color:var(--muted);}
 .pause-resume-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.25);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .pause-resume-btn svg{width:18px;height:18px;}
 .pause-resume-btn.resume{background:rgba(0,245,196,.2);border-color:var(--neon);color:var(--neon);}
-.rec-timer{position:absolute;top:calc(var(--safe-top)+3.6rem);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);backdrop-filter:blur(10px);padding:.32rem .85rem;border-radius:20px;font-size:.72rem;font-family:'Space Mono',monospace;font-weight:700;color:#fff;z-index:11;display:flex;align-items:center;gap:.48rem;}
+.rec-timer{position:fixed;top:calc(env(safe-area-inset-top,44px) + 4.2rem);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);backdrop-filter:blur(10px);padding:.32rem .85rem;border-radius:20px;font-size:.72rem;font-family:'Space Mono',monospace;font-weight:700;color:#fff;z-index:311;display:flex;align-items:center;gap:.48rem;}
 .rec-dot{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 .rec-timer.paused-state{background:rgba(245,165,0,.88);}
 .rec-timer.paused-state .rec-dot{animation:none;}
-.seg-bar{position:absolute;top:calc(var(--safe-top) + 2.9rem);left:1.2rem;right:1.2rem;height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;z-index:11;display:flex;gap:2px;}
+.seg-bar{position:fixed;top:calc(env(safe-area-inset-top,44px) + 3.6rem);left:1.2rem;right:1.2rem;height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;z-index:311;display:flex;gap:2px;}
 .seg-fill{height:100%;border-radius:2px;}
-.dur-warn{position:absolute;bottom:calc(var(--safe-bot)+8.5rem);left:50%;transform:translateX(-50%);background:rgba(245,165,0,.92);color:#000;padding:.32rem .9rem;border-radius:20px;font-size:.7rem;font-family:'Space Mono',monospace;font-weight:700;white-space:nowrap;z-index:12;animation:fadeUp .3s ease;}
+.dur-warn{position:fixed;bottom:calc(env(safe-area-inset-bottom,34px) + 9rem);left:50%;transform:translateX(-50%);background:rgba(245,165,0,.92);color:#000;padding:.32rem .9rem;border-radius:20px;font-size:.7rem;font-family:'Space Mono',monospace;font-weight:700;white-space:nowrap;z-index:311;animation:fadeUp .3s ease;}
 .no-cam-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:#000;z-index:8;}
 .sched-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem 1rem;margin:.75rem 1rem;}
 .sched-panel-title{font-size:.58rem;font-weight:700;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-family:'Space Mono',monospace;margin-bottom:.62rem;}
@@ -265,6 +265,7 @@ export default function App() {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showCamera, setShowCamera]   = useState(false);
   const [recordedCover, setRecordedCover] = useState(null);
+  const [recordedBlob, setRecordedBlob]   = useState(null);
   const [toast, setToast]             = useState(null);
   const [newComment, setNewComment]   = useState("");
   const [notifs, setNotifs]           = useState([]);
@@ -506,7 +507,7 @@ export default function App() {
       {showCamera && (
         <CameraScreen
           onClose={() => setShowCamera(false)}
-          onUseVideo={(cover) => { setShowCamera(false); setRecordedCover(cover); setShowLoopIn(true); }}
+          onUseVideo={(cover, blob) => { setShowCamera(false); setRecordedCover(cover); setRecordedBlob(blob); setShowLoopIn(true); }}
         />
       )}
 
@@ -540,10 +541,11 @@ export default function App() {
 
       {showLoopIn && (
         <LoopInModal groups={myGroups}
-          onClose={() => { setShowLoopIn(false); setRecordedCover(null); }}
+          onClose={() => { setShowLoopIn(false); setRecordedCover(null); setRecordedBlob(null); }}
           onRecord={() => { setShowLoopIn(false); setShowCamera(true); }}
-          onUpload={(gid, title, videoBlob, coverBlob) => { uploadVideo(gid, title, videoBlob, coverBlob); setShowLoopIn(false); setRecordedCover(null); }}
+          onUpload={(gid, title, videoBlob, coverBlob) => { uploadVideo(gid, title, videoBlob, coverBlob); setShowLoopIn(false); setRecordedCover(null); setRecordedBlob(null); }}
           recordedCoverPhoto={recordedCover}
+          recordedVideoBlob={recordedBlob}
         />
       )}
 
@@ -997,8 +999,9 @@ function GroupDetailScreen({ group, users, currentUser, onBack, onToggleLike, on
 }
 
 // ─── LOOP IN MODAL ────────────────────────────────────────────────────────────
-function LoopInModal({ groups, onClose, onRecord, onUpload, recordedCoverPhoto }) {
-  const [step, setStep]           = useState(recordedCoverPhoto != null ? "cover" : "choose");
+function LoopInModal({ groups, onClose, onRecord, onUpload, recordedCoverPhoto, recordedVideoBlob }) {
+  const fromCamera = recordedVideoBlob != null;
+  const [step, setStep]           = useState(fromCamera ? "cover" : "choose");
   const [gid, setGid]             = useState(groups[0]?.id || "");
   const [title, setTitle]         = useState("");
   const [videoFile, setVideoFile] = useState(null);
@@ -1016,14 +1019,14 @@ function LoopInModal({ groups, onClose, onRecord, onUpload, recordedCoverPhoto }
 
   const handlePost = async () => {
     if (!gid) return;
-    let videoBlob = null, coverBlob = null;
-    if (videoFile) videoBlob = videoFile;
-    if (coverPhoto && coverPhoto.startsWith("data:")) {
-      const res = await fetch(coverPhoto);
-      coverBlob = await res.blob();
-    } else if (coverPhoto && coverPhoto.startsWith("blob:")) {
-      const res = await fetch(coverPhoto);
-      coverBlob = await res.blob();
+    // Use recorded blob if came from camera, otherwise use file picker
+    let videoBlob = recordedVideoBlob || videoFile || null;
+    let coverBlob = null;
+    if (coverPhoto) {
+      try {
+        const res = await fetch(coverPhoto);
+        coverBlob = await res.blob();
+      } catch(e) { coverBlob = null; }
     }
     onUpload(gid, title || "Untitled Loop", videoBlob, coverBlob);
   };
@@ -1114,12 +1117,24 @@ function LoopInModal({ groups, onClose, onRecord, onUpload, recordedCoverPhoto }
               </div>
             </div>
 
-            <div className={`upload-zone ${videoFile?"has-file":""}`} onClick={()=>fileInputRef.current?.click()}>
-              <span className="upload-icon">{videoFile?"✅":"📹"}</span>
-              <div style={{fontWeight:700}}>{videoFile?"Video ready!":"Tap to choose video"}</div>
-              <div className="upload-hint">MP4 · MOV · 5–15 min</div>
-            </div>
-            <input ref={fileInputRef} type="file" accept="video/*" style={{display:"none"}} onChange={e=>setVideoFile(e.target.files[0]||null)}/>
+            {fromCamera ? (
+              <div style={{background:"rgba(0,245,196,.06)",border:"1.5px solid rgba(0,245,196,.3)",borderRadius:16,padding:"1rem 1.2rem",display:"flex",alignItems:"center",gap:".85rem"}}>
+                <span style={{fontSize:"1.5rem"}}>🎬</span>
+                <div>
+                  <div style={{fontWeight:700,fontSize:".9rem",color:"var(--neon)"}}>Video recorded ✓</div>
+                  <div style={{fontSize:".68rem",color:"var(--muted)",fontFamily:"Space Mono",marginTop:2}}>Ready to post</div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className={`upload-zone ${videoFile?"has-file":""}`} onClick={()=>fileInputRef.current?.click()}>
+                  <span className="upload-icon">{videoFile?"✅":"📹"}</span>
+                  <div style={{fontWeight:700}}>{videoFile?"Video ready!":"Tap to choose video"}</div>
+                  <div className="upload-hint">MP4 · MOV · 5–15 min</div>
+                </div>
+                <input ref={fileInputRef} type="file" accept="video/*" style={{display:"none"}} onChange={e=>setVideoFile(e.target.files[0]||null)}/>
+              </>
+            )}
 
             <input placeholder="Give your Loop a title..." value={title} onChange={e=>setTitle(e.target.value)}/>
 
@@ -1146,12 +1161,14 @@ function LoopInModal({ groups, onClose, onRecord, onUpload, recordedCoverPhoto }
 
 // ─── CAMERA SCREEN ────────────────────────────────────────────────────────────
 function CameraScreen({ onClose, onUseVideo }) {
-  const videoRef      = useRef(null);
-  const mrRef         = useRef(null);
-  const streamRef     = useRef(null);
-  const chunksRef     = useRef([]);
-  const timerRef      = useRef(null);
-  const canvasRef     = useRef(null);
+  const videoRef     = useRef(null);
+  const mrRef        = useRef(null);
+  const streamRef    = useRef(null);
+  const chunksRef    = useRef([]);
+  const timerRef     = useRef(null);
+  const canvasRef    = useRef(document.createElement("canvas"));
+  const coverInputRef = useRef(null);
+  const facingRef    = useRef("user"); // useRef so flipCam always reads latest value
 
   const [facing, setFacing]         = useState("user");
   const [recState, setRecState]     = useState("idle");
@@ -1161,111 +1178,235 @@ function CameraScreen({ onClose, onUseVideo }) {
   const [segments, setSegments]     = useState([]);
   const [coverPhoto, setCoverPhoto] = useState(null);
   const [coverAnim, setCoverAnim]   = useState(false);
+  const [videoBlobUrl, setVideoBlobUrl] = useState(null); // store recorded blob
 
   const MAX = 900, MIN = 300;
 
-  const startCam = useCallback(async (f) => {
+  // Start camera — accepts facing directly so it never reads stale state
+  const startCam = async (f) => {
     if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video:{facingMode:f,width:{ideal:1280},height:{ideal:720}},audio:true });
+      const constraints = {
+        video: { facingMode: f, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true,
+      };
+      const s = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = s;
-      if (videoRef.current) { videoRef.current.srcObject = s; videoRef.current.play(); }
+      if (videoRef.current) {
+        videoRef.current.srcObject = s;
+        await videoRef.current.play().catch(()=>{});
+      }
       setHasCam(true);
-    } catch { setHasCam(false); }
+    } catch(e) {
+      console.error("Camera error:", e);
+      setHasCam(false);
+    }
+  };
+
+  useEffect(() => {
+    startCam("user");
+    return () => {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+      clearInterval(timerRef.current);
+    };
   }, []);
 
-  useEffect(() => { startCam(facing); return () => { streamRef.current?.getTracks().forEach(t=>t.stop()); clearInterval(timerRef.current); }; }, []);
-
-  const flipCam = async () => { const next = facing==="user"?"environment":"user"; setFacing(next); await startCam(next); };
+  // Fix: use ref to always flip to the correct next camera
+  const flipCam = async () => {
+    const next = facingRef.current === "user" ? "environment" : "user";
+    facingRef.current = next;
+    setFacing(next);
+    await startCam(next);
+  };
 
   const startRec = () => {
     if (!streamRef.current) return;
     chunksRef.current = [];
-    const mr = new MediaRecorder(streamRef.current, { mimeType: MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : "video/webm" });
+    // iOS Safari uses mp4, others use webm
+    const mimeType = MediaRecorder.isTypeSupported("video/mp4")
+      ? "video/mp4"
+      : MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+      ? "video/webm;codecs=vp9"
+      : "video/webm";
+    const mr = new MediaRecorder(streamRef.current, { mimeType });
     mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    mr.start(100); mrRef.current = mr;
+    mr.onstop = () => {
+      // Build blob as soon as recording stops
+      const blob = new Blob(chunksRef.current, { type: mr.mimeType });
+      const url = URL.createObjectURL(blob);
+      setVideoBlobUrl(url);
+    };
+    mr.start(100);
+    mrRef.current = mr;
     setSecs(0); setRecState("recording");
     timerRef.current = setInterval(() => setSecs(s => {
-      if (s+1 >= MAX) { stopRec(); return s; }
-      if (s+1 === MIN) { setWarn("5 min reached — you can stop anytime"); setTimeout(()=>setWarn(null),2500); }
-      return s+1;
+      if (s + 1 >= MAX) { stopRec(); return s; }
+      if (s + 1 === MIN) { setWarn("5 min reached — you can stop anytime"); setTimeout(() => setWarn(null), 2500); }
+      return s + 1;
     }), 1000);
   };
 
-  const pauseRec = () => { mrRef.current?.pause(); clearInterval(timerRef.current); setSecs(s => { setSegments(sg=>[...sg,s]); return s; }); setRecState("paused"); };
-  const resumeRec = () => { mrRef.current?.resume(); setRecState("recording"); timerRef.current = setInterval(()=>setSecs(s=>{if(s+1>=MAX){stopRec();return s;}return s+1;}),1000); };
-  const stopRec = () => { mrRef.current?.stop(); clearInterval(timerRef.current); setRecState("done"); };
-
-  const snapCover = () => {
-    if (!videoRef.current) return;
-    const canvas = canvasRef.current || document.createElement("canvas");
-    canvas.width = videoRef.current.videoWidth || 720;
-    canvas.height = videoRef.current.videoHeight || 1280;
-    const ctx = canvas.getContext("2d");
-    if (facing==="user") { ctx.translate(canvas.width,0); ctx.scale(-1,1); }
-    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    setCoverPhoto(canvas.toDataURL("image/jpeg",.9));
-    setCoverAnim(true); setTimeout(()=>setCoverAnim(false),300);
+  const pauseRec = () => {
+    mrRef.current?.pause();
+    clearInterval(timerRef.current);
+    setSegments(sg => [...sg, secs]);
+    setRecState("paused");
   };
 
-  const handleCoverFile = e => { const f=e.target.files[0]; if(!f) return; setCoverPhoto(URL.createObjectURL(f)); };
-  const fmt = s => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-  const prevTotal = segments.length>0 ? segments[segments.length-1] : 0;
-  const activeWidth = recState==="recording" ? ((secs-prevTotal)/MAX)*100 : 0;
-  const coverInputRef = useRef(null);
+  const resumeRec = () => {
+    mrRef.current?.resume();
+    setRecState("recording");
+    timerRef.current = setInterval(() => setSecs(s => {
+      if (s + 1 >= MAX) { stopRec(); return s; }
+      return s + 1;
+    }), 1000);
+  };
 
+  const stopRec = () => {
+    mrRef.current?.stop(); // triggers onstop → builds blob
+    clearInterval(timerRef.current);
+    setRecState("done");
+  };
+
+  // Snap cover from live camera — keep stream running during cover step
+  const snapCover = () => {
+    if (!videoRef.current) return;
+    const canvas = canvasRef.current;
+    canvas.width = videoRef.current.videoWidth || 640;
+    canvas.height = videoRef.current.videoHeight || 480;
+    const ctx = canvas.getContext("2d");
+    ctx.save();
+    if (facingRef.current === "user") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
+    setCoverPhoto(canvas.toDataURL("image/jpeg", 0.9));
+    setCoverAnim(true);
+    setTimeout(() => setCoverAnim(false), 400);
+  };
+
+  const handleCoverFile = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    setCoverPhoto(URL.createObjectURL(f));
+  };
+
+  const handleFinish = (cover) => {
+    // Build the actual blob from chunks to pass back
+    const blob = chunksRef.current.length > 0
+      ? new Blob(chunksRef.current, { type: mrRef.current?.mimeType || "video/mp4" })
+      : null;
+    onUseVideo(cover, blob);
+  };
+
+  const fmt = s => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const prevTotal = segments.length > 0 ? segments[segments.length - 1] : 0;
+  const activeWidth = recState === "recording" ? ((secs - prevTotal) / MAX) * 100 : 0;
+
+  // ── COVER STEP ── (camera still live in background for snapping)
   if (recState === "cover") {
     return (
-      <div className="cam-screen" style={{background:"var(--bg)"}}>
-        <video ref={videoRef} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",opacity:.12,filter:"blur(12px)",transform:facing==="user"?"scaleX(-1)":"none"}} muted playsInline autoPlay/>
-        <div style={{position:"relative",zIndex:5,display:"flex",flexDirection:"column",height:"100%",padding:"calc(var(--safe-top) + 1rem) 1.4rem calc(var(--safe-bot)+1.2rem)",gap:"1rem",overflow:"auto"}}>
+      <div className="cam-screen" style={{background:"#000"}}>
+        {/* Live camera blurred in background — stream still running */}
+        <video ref={videoRef}
+          style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",
+            opacity:.15,filter:"blur(14px)",
+            transform:facing==="user"?"scaleX(-1)":"none"}}
+          muted playsInline autoPlay/>
+
+        <div style={{position:"relative",zIndex:5,display:"flex",flexDirection:"column",
+          height:"100%",
+          padding:"calc(env(safe-area-inset-top,44px) + 1rem) 1.2rem calc(env(safe-area-inset-bottom,34px) + 1.2rem)",
+          gap:"1rem"}}>
+
+          {/* Header */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <button className="cam-close-btn" onClick={()=>setRecState("done")} style={{background:"rgba(255,255,255,.08)"}}><Ic.Back/></button>
-            <div style={{textAlign:"center"}}><div style={{fontSize:"1rem",fontWeight:800}}>Cover Photo</div><div style={{fontSize:".62rem",color:"var(--muted)",fontFamily:"Space Mono"}}>what your friends see first</div></div>
+            <button className="cam-close-btn" onClick={()=>setRecState("done")}
+              style={{background:"rgba(255,255,255,.12)",border:"1px solid rgba(255,255,255,.15)"}}>
+              <Ic.Back/>
+            </button>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontSize:"1rem",fontWeight:800,color:"#fff"}}>Cover Photo</div>
+              <div style={{fontSize:".6rem",color:"rgba(255,255,255,.5)",fontFamily:"Space Mono"}}>what your friends see first</div>
+            </div>
             <button className="cam-close-btn" onClick={onClose}><Ic.X/></button>
           </div>
-          <div style={{flex:1,borderRadius:20,overflow:"hidden",position:"relative",border:`2px solid ${coverPhoto?"var(--neon)":"rgba(255,255,255,.1)"}`,background:"rgba(0,0,0,.4)",minHeight:220,display:"flex",alignItems:"center",justifyContent:"center"}}>
-            {coverPhoto ? <img src={coverPhoto} alt="cover" style={{width:"100%",height:"100%",objectFit:"cover"}}/> : <div style={{textAlign:"center",color:"rgba(255,255,255,.45)"}}><div style={{fontSize:"3.5rem"}}>🖼️</div><div style={{fontSize:".88rem",fontWeight:600,marginTop:".5rem"}}>No cover yet</div></div>}
-            {coverAnim&&<div style={{position:"absolute",inset:0,background:"#fff",opacity:.6,borderRadius:18,animation:"fadeOut .3s ease forwards"}}/>}
-            {coverPhoto&&<div style={{position:"absolute",bottom:".75rem",right:".75rem",background:"rgba(0,245,196,.9)",color:"#000",padding:".25rem .6rem",borderRadius:8,fontSize:".65rem",fontFamily:"Space Mono",fontWeight:700}}>✓ Set</div>}
+
+          {/* Preview */}
+          <div style={{flex:1,borderRadius:18,overflow:"hidden",position:"relative",
+            border:`2px solid ${coverPhoto?"var(--neon)":"rgba(255,255,255,.12)"}`,
+            background:"rgba(0,0,0,.5)",display:"flex",alignItems:"center",justifyContent:"center",minHeight:200}}>
+            {coverPhoto
+              ? <img src={coverPhoto} alt="cover" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+              : <div style={{textAlign:"center",color:"rgba(255,255,255,.4)"}}>
+                  <div style={{fontSize:"3rem"}}>🖼️</div>
+                  <div style={{fontSize:".82rem",fontWeight:600,marginTop:".5rem"}}>Snap or choose a photo</div>
+                </div>}
+            {coverAnim && <div style={{position:"absolute",inset:0,background:"#fff",borderRadius:16,animation:"flashOut .4s ease forwards"}}/>}
+            {coverPhoto && <div style={{position:"absolute",bottom:".75rem",right:".75rem",background:"rgba(0,245,196,.9)",color:"#000",padding:".22rem .55rem",borderRadius:7,fontSize:".6rem",fontFamily:"Space Mono",fontWeight:700}}>✓ SET</div>}
           </div>
+
+          {/* Actions */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".65rem"}}>
-            <button onClick={snapCover} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:".5rem",padding:"1rem .5rem",border:"1.5px solid rgba(255,255,255,.15)",borderRadius:14,background:"rgba(255,255,255,.06)",cursor:"pointer"}}>
-              <div style={{width:44,height:44,borderRadius:"50%",border:"2.5px solid rgba(255,255,255,.7)",display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:30,height:30,borderRadius:"50%",background:"rgba(255,255,255,.8)"}}/></div>
-              <div style={{fontSize:".75rem",fontWeight:700,color:"#fff"}}>Snap Photo</div>
-              <div style={{fontSize:".6rem",color:"rgba(255,255,255,.45)",fontFamily:"Space Mono"}}>from camera</div>
+            <button onClick={snapCover} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:".45rem",
+              padding:"1rem .5rem",border:"1.5px solid rgba(255,255,255,.18)",borderRadius:14,
+              background:"rgba(255,255,255,.07)",cursor:"pointer"}}>
+              <div style={{width:44,height:44,borderRadius:"50%",border:"2.5px solid rgba(255,255,255,.8)",
+                display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <div style={{width:30,height:30,borderRadius:"50%",background:"rgba(255,255,255,.85)"}}/>
+              </div>
+              <div style={{fontSize:".78rem",fontWeight:700,color:"#fff"}}>Snap Photo</div>
             </button>
-            <button onClick={()=>coverInputRef.current?.click()} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:".5rem",padding:"1rem .5rem",border:"1.5px solid rgba(255,255,255,.15)",borderRadius:14,background:"rgba(255,255,255,.06)",cursor:"pointer"}}>
-              <span style={{fontSize:"2rem"}}>🗂️</span>
-              <div style={{fontSize:".75rem",fontWeight:700,color:"#fff"}}>From Library</div>
-              <div style={{fontSize:".6rem",color:"rgba(255,255,255,.45)",fontFamily:"Space Mono"}}>photos & files</div>
+            <button onClick={()=>coverInputRef.current?.click()} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:".45rem",
+              padding:"1rem .5rem",border:"1.5px solid rgba(255,255,255,.18)",borderRadius:14,
+              background:"rgba(255,255,255,.07)",cursor:"pointer"}}>
+              <span style={{fontSize:"2.2rem",lineHeight:1}}>🗂️</span>
+              <div style={{fontSize:".78rem",fontWeight:700,color:"#fff"}}>From Library</div>
             </button>
           </div>
-          <input ref={coverInputRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleCoverFile}/>
+          <input ref={coverInputRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={handleCoverFile}/>
+
+          {/* Continue buttons */}
           <div style={{display:"flex",gap:".6rem"}}>
-            <button className="btn btn-g" style={{flex:1,color:"rgba(255,255,255,.6)",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)"}} onClick={()=>onUseVideo(null)}>Skip</button>
-            <button className="btn btn-p" style={{flex:2}} onClick={()=>onUseVideo(coverPhoto)}>{coverPhoto?"Continue with Cover →":"Continue without Cover →"}</button>
+            <button className="btn btn-g" style={{flex:1,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.12)",color:"rgba(255,255,255,.7)"}}
+              onClick={()=>handleFinish(null)}>Skip</button>
+            <button className="btn btn-p" style={{flex:2}}
+              onClick={()=>handleFinish(coverPhoto)}>
+              {coverPhoto ? "Use This Cover →" : "Continue →"}
+            </button>
           </div>
         </div>
-        <style>{`@keyframes fadeOut{from{opacity:.6}to{opacity:0}}`}</style>
+        <style>{`@keyframes flashOut{from{opacity:.7}to{opacity:0}}`}</style>
       </div>
     );
   }
 
   return (
     <div className="cam-screen">
-      <video ref={videoRef} className="cam-video" muted playsInline autoPlay style={{transform:facing==="user"?"scaleX(-1)":"none"}}/>
+      <video ref={videoRef} className="cam-video" muted playsInline autoPlay
+        style={{transform:facing==="user"?"scaleX(-1)":"none"}}/>
       <canvas ref={canvasRef} style={{display:"none"}}/>
-      {recState!=="idle"&&(
+
+      {recState !== "idle" && (
         <div className="seg-bar">
-          {segments.map((seg,i)=>{const prev=i===0?0:segments[i-1];return <div key={i} className="seg-fill" style={{width:`${((seg-prev)/MAX)*100}%`,background:"rgba(0,245,196,.55)"}}/>;})}
-          {(recState==="recording"||recState==="paused")&&<div className="seg-fill" style={{width:`${activeWidth}%`,background:"var(--neon)"}}/>}
+          {segments.map((seg, i) => {
+            const prev = i === 0 ? 0 : segments[i - 1];
+            return <div key={i} className="seg-fill" style={{width:`${((seg-prev)/MAX)*100}%`,background:"rgba(0,245,196,.55)"}}/>;
+          })}
+          {(recState==="recording"||recState==="paused") && <div className="seg-fill" style={{width:`${activeWidth}%`,background:"var(--neon)"}}/>}
         </div>
       )}
-      {(recState==="recording"||recState==="paused")&&(
-        <div className={`rec-timer ${recState==="paused"?"paused-state":""}`}><div className="rec-dot"/>{fmt(secs)} / {fmt(MAX)}</div>
+
+      {(recState==="recording"||recState==="paused") && (
+        <div className={`rec-timer ${recState==="paused"?"paused-state":""}`}>
+          <div className="rec-dot"/>{fmt(secs)} / {fmt(MAX)}
+        </div>
       )}
-      {warn&&<div className="dur-warn">⚡ {warn}</div>}
+      {warn && <div className="dur-warn">⚡ {warn}</div>}
+
+      {/* TOP BAR */}
       <div className="cam-top">
         <button className="cam-close-btn" onClick={onClose}><Ic.X/></button>
         <div style={{color:"rgba(255,255,255,.82)",fontSize:".7rem",fontFamily:"Space Mono",fontWeight:700}}>
@@ -1273,24 +1414,49 @@ function CameraScreen({ onClose, onUseVideo }) {
         </div>
         <button className="cam-flip-btn" onClick={flipCam} disabled={recState==="recording"}><Ic.Flip/></button>
       </div>
-      {!hasCam&&<div className="no-cam-overlay"><span style={{fontSize:"3rem"}}>📷</span><p style={{color:"var(--muted)",fontFamily:"Space Mono",fontSize:".78rem",textAlign:"center",lineHeight:1.75,padding:"0 2.5rem"}}>Camera access required.<br/>Enable in your browser settings.</p><button className="btn btn-g btn-sm" onClick={onClose}>Go Back</button></div>}
+
+      {!hasCam && (
+        <div className="no-cam-overlay">
+          <span style={{fontSize:"3rem"}}>📷</span>
+          <p style={{color:"var(--muted)",fontFamily:"Space Mono",fontSize:".78rem",textAlign:"center",lineHeight:1.75,padding:"0 2.5rem"}}>
+            Camera access required.<br/>Enable in your browser settings.
+          </p>
+          <button className="btn btn-g btn-sm" onClick={onClose}>Go Back</button>
+        </div>
+      )}
+
+      {/* BOTTOM BAR */}
       <div className="cam-bot">
         <div style={{width:50,display:"flex",justifyContent:"center"}}>
-          {recState==="recording"&&<button className="pause-resume-btn" onClick={pauseRec}><Ic.Pause/></button>}
-          {recState==="paused"&&<button className="pause-resume-btn resume" onClick={resumeRec}><Ic.Resume/></button>}
+          {recState==="recording" && <button className="pause-resume-btn" onClick={pauseRec}><Ic.Pause/></button>}
+          {recState==="paused" && <button className="pause-resume-btn resume" onClick={resumeRec}><Ic.Resume/></button>}
         </div>
+
         <div className="rec-btn-wrap">
-          {recState==="done" ? (
-            <button className="btn btn-p" style={{borderRadius:30,padding:".88rem 1.8rem",fontSize:".88rem"}} onClick={()=>setRecState("cover")}>Add Cover Photo →</button>
+          {recState === "done" ? (
+            <button className="btn btn-p" style={{borderRadius:30,padding:".88rem 1.8rem",fontSize:".88rem"}}
+              onClick={() => setRecState("cover")}>
+              Add Cover Photo →
+            </button>
           ) : (
-            <button className="rec-btn" onClick={()=>{if(recState==="idle")startRec();else stopRec();}}>
+            <button className="rec-btn" onClick={() => { if (recState==="idle") startRec(); else stopRec(); }}>
               <div className={`rec-inner ${recState==="recording"?"recording":recState==="paused"?"paused":""}`}/>
             </button>
           )}
-          <div className="rec-label">{recState==="idle"&&"tap to record"}{recState==="recording"&&"tap to stop"}{recState==="paused"&&"tap to stop · ← resume"}</div>
+          <div className="rec-label">
+            {recState==="idle"&&"tap to record"}
+            {recState==="recording"&&"tap to stop"}
+            {recState==="paused"&&"tap to stop"}
+          </div>
         </div>
+
         <div style={{width:50,display:"flex",justifyContent:"center"}}>
-          {recState==="done"&&<button onClick={()=>onUseVideo(null)} style={{background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,.45)",fontFamily:"Space Mono",fontSize:".6rem",textAlign:"center",lineHeight:1.5}}>Skip<br/>Cover</button>}
+          {recState==="done" && (
+            <button onClick={()=>handleFinish(null)} style={{background:"none",border:"none",cursor:"pointer",
+              color:"rgba(255,255,255,.45)",fontFamily:"Space Mono",fontSize:".6rem",textAlign:"center",lineHeight:1.5}}>
+              Skip<br/>Cover
+            </button>
+          )}
         </div>
       </div>
     </div>
