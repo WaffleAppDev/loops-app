@@ -421,8 +421,13 @@ export default function App() {
     let videoUrl = null, coverUrl = null;
 
     if (videoBlob) {
-      const path = `${groupId}/${Date.now()}.webm`;
-      const { data } = await supabase.storage.from("videos").upload(path, videoBlob);
+      const ext = videoBlob.type?.includes("mp4") ? "mp4" : "webm";
+      const path = `${groupId}/${Date.now()}.${ext}`;
+      console.log("Uploading video:", path, videoBlob.type, videoBlob.size);
+      const { data, error } = await supabase.storage
+        .from("videos")
+        .upload(path, videoBlob, { contentType: videoBlob.type || "video/mp4" });
+      console.log("Video upload result:", data, error);
       if (data) videoUrl = supabase.storage.from("videos").getPublicUrl(data.path).data.publicUrl;
     }
 
