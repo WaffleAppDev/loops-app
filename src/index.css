@@ -1,0 +1,31 @@
+/* iOS PWA base reset */
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #07070f;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
+}
+
+#root {
+  height: 100%;
+  height: -webkit-fill-available;
+}
+
+/* Prevent callout on long press */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* But allow text selection in inputs */
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}

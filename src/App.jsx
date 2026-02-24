@@ -23,24 +23,52 @@ const CSS = `
   --text:#eeeeff;--muted:#5a5a88;--radius:18px;
   --safe-top:env(safe-area-inset-top,44px);
   --safe-bot:env(safe-area-inset-bottom,34px);
+  --nav-h:calc(56px + env(safe-area-inset-bottom,34px));
 }
-html,body{height:100%;overflow:hidden;background:#000;}
-body{font-family:'Syne',sans-serif;color:var(--text);}
-.shell{width:100%;max-width:430px;height:100vh;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+html{height:-webkit-fill-available;}
+html,body{height:100%;background:#000;overscroll-behavior:none;}
+body{font-family:'Syne',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;}
+#root{height:100%;height:-webkit-fill-available;}
+
+/* ── SHELL: flex column, nav at bottom as flex child, NOT absolute ── */
+.shell{
+  width:100%;max-width:430px;
+  height:100svh;
+  height:-webkit-fill-available;
+  margin:0 auto;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
 .status-bar{height:var(--safe-top);min-height:44px;flex-shrink:0;}
-.screen{flex:1;display:flex;flex-direction:column;overflow:hidden;animation:fadeUp .28s ease;}
+
+/* screens take remaining space above nav */
+.screen{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;animation:fadeUp .28s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.scroll-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:6rem;}
+.scroll-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:1.5rem;}
 .scroll-body::-webkit-scrollbar{display:none;}
+
 .page-hdr{padding:.85rem 1.25rem .6rem;display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,15,.9);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border);flex-shrink:0;}
 .page-hdr-title{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;}
 .page-hdr-title span{color:var(--neon);}
-.nav-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(7,7,15,.96);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:.5rem 0 calc(var(--safe-bot) + .2rem);z-index:100;flex-shrink:0;}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);transition:color .2s;padding:.3rem .5rem;}
+
+/* ── NAV BAR: flex child at bottom, NOT absolute ── */
+.nav-bar{
+  flex-shrink:0;
+  width:100%;
+  background:rgba(7,7,15,.97);
+  backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:.5rem 0 env(safe-area-inset-bottom,20px);
+  z-index:100;
+}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);transition:color .2s;padding:.3rem .5rem;min-height:52px;justify-content:center;}
 .nav-btn.active{color:var(--neon);}
 .nav-btn svg{width:23px;height:23px;}
 .nav-pip{width:4px;height:4px;border-radius:50%;background:var(--neon);margin-top:1px;}
-.nav-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:none;cursor:pointer;padding:.3rem .5rem;font-family:'Syne',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);transition:color .2s;}
+.nav-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:none;cursor:pointer;padding:.3rem .5rem;font-family:'Syne',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);transition:color .2s;min-height:52px;justify-content:center;}
 .loop-in-icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--neon),#00b8ff);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,245,196,.5);transition:transform .18s,box-shadow .18s;}
 .loop-in-icon:active{transform:scale(.92);}
 .loop-in-icon svg{width:22px;height:22px;color:#000;}
@@ -87,7 +115,7 @@ body{font-family:'Syne',sans-serif;color:var(--text);}
 .btn-ico{padding:.45rem;border-radius:10px;}
 .btn-ico svg{width:16px;height:16px;}
 .lbl{font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace;margin-bottom:.48rem;}
-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:.78rem 1rem;color:var(--text);font-family:'Syne',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;}
+input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:.78rem 1rem;color:var(--text);font-family:'Syne',sans-serif;font-size:1rem;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:12px;}
 input:focus{border-color:var(--neon);}
 input::placeholder{color:var(--muted);}
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;}
@@ -543,12 +571,9 @@ export default function App() {
             <div className="screen">
               <div className="page-hdr">
                 <div className="page-hdr-title">your <span>feed</span></div>
-                <div style={{display:"flex",gap:".45rem",alignItems:"center"}}>
-                  <button className="btn btn-g btn-sm" onClick={() => setShowGroupModal(true)} style={{display:"flex",alignItems:"center",gap:".28rem",padding:".4rem .68rem",fontSize:".7rem"}}>
+                <button className="btn btn-g btn-sm" onClick={() => setShowGroupModal(true)} style={{display:"flex",alignItems:"center",gap:".28rem",padding:".4rem .68rem",fontSize:".7rem"}}>
                     <span style={{fontSize:".9rem"}}>＋</span> Group
                   </button>
-                  <div className="av av-sm" style={{background:(profile.avatar_color||"#00f5c4")+"22",color:profile.avatar_color||"#00f5c4"}}>{initials(profile.full_name||profile.username)}</div>
-                </div>
               </div>
 
               <div style={{display:"flex",gap:".5rem",padding:".65rem 1rem .55rem",overflowX:"auto",flexShrink:0,background:"rgba(7,7,15,.92)",borderBottom:"1px solid var(--border)"}} className="hide-scroll">
